@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+		html,body{
+			margin:0;
+			padding:0;
+			width: 100px;
+			height: 100px;
+			background-color: #ddd;
+		}
+		#puzzle{
+			position: absolute;
+			top: 40%;
+			left: 20%;
+			width:340px;
+			height: 260px;
+		}
+		#puzzle .container{
+			float: left;
+			width: 107px;
+			height: 80px;
+			z-index: 1;
+		}
+		#puzzle .container i{
+			display: block;
+			margin:4px;
+			width:99px;
+			height: 72px;
+			background-color: #fff;
+		}
+		#video{
+			opacity: 1;
+		}
+		canvas{
+			z-index: 999;
+		}
+	</style>
+</head>
+<body>
+	<div id="puzzle">
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+		<div class="container" ><i></i></div>
+	</div>
+	<video muted width="320" height="240" id="video" autoplay="autoplay">
+		<source src="video/movie.mp4" type="video/mp4"></source>
+	</video>
+	<input type="button" value="开始" id="dianji">
+</body>
+</html>
+<script type="text/javascript" src="http://g.alicdn.com/sj/lib/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/hammer.js/2.0.8/hammer.js"></script>
+<script src="js/jquery.hammer.js"></script>
+<script>
+	// var cas = document.getElementById('cas');
+	var video = document.getElementById('video');
+	// var context = cas.getContext("2d");
+	var ctx = [];
+	var index = [];
+	var _switch = true;
+	$("input").on("click",function(){
+		if (_switch) {
+			$("#video").css("opacity",0);
+			$("input").css("display","none");
+			play();
+			_switch = false;
+		}
+	})
+	function play(){
+	for(var i = 0;i<9;i++){
+		var dom = document.createElement('canvas');
+		var context = dom.getContext("2d");
+		ctx.push(context);
+		// console.log(ctx);
+		dom.width = 107;
+		dom.height = 80;
+		dom.setAttribute("data-index",i);
+		dom.setAttribute("class","canvas");
+		var _l = Math.floor(Math.random()*1200);
+		var _t = Math.floor(Math.random()*800);
+		dom.style.position = "absolute";
+		dom.style.left = _l+"px";
+		dom.style.top = _t+"px";
+		document.body.appendChild(dom);
+	} 
+	function drawVideo(){
+		for(var i =0;i<9;i++){
+			var row = Math.floor(i/3) //取余数获取行数
+       	 	var col =  Math.floor(i%3) //取模获得列数
+       	 	ctx[i].drawImage(video,(col*107),(row*80),107,80,0,0,107,80);
+		}
+	}
+	setInterval(function(){
+       drawVideo();
+     },50);
+	var hammer = $(".canvas").hammer();
+	hammer.on("panstart",function(ev){
+		console.log($(this).offset());
+		console.log(ev);
+		$(this).data("data-top",$(this).offset().top)
+		$(this).data("data-left",$(this).offset().left)
+		$(this).data("position",$(this).offset());
+	})
+	hammer.on("panmove",function(ev){
+		var top = $(this).data("position").top + ev.gesture.deltaY;
+		var left = $(this).data("position").left + ev.gesture.deltaX;
+		$(this).css({
+			top:top,
+			"left":left
+		})
+	})
+	hammer.on("panend",function(ev){
+		var centerX = $(this).data("position").left+ev.gesture.deltaX+53.5;
+		var centerY =  $(this).data("position").top+ev.gesture.deltaY+40;
+		for(i=0;i<$(".container").length;i++){
+			if (centerX > $(".container").eq(i).offset().left && centerX < $(".container").eq(i).offset().left+107 && centerY > $(".container").eq(i).offset().top && centerY < $(".container").eq(i).offset().top+80) {
+				console.log("ok");
+					$(this).css({
+						"top":$(".container").eq(i).offset().top+"px",
+						"left":$(".container").eq(i).offset().left + "px"
+					})
+				}
+		}
+		console.log($('#puzzle .container').eq(parseInt($(this).attr("data-index"))));
+		var parentLeft1 = $('#puzzle .container').eq(parseInt($(this).attr("data-index"))).offset().left;
+		var parentTop1 = $('#puzzle .container').eq(parseInt($(this).attr("data-index"))).offset().top;
+		var parentLeft = $('#puzzle .container').eq(parseInt($(this).attr("data-index"))).offset().left+107;
+		var parentTop = $('#puzzle .container').eq(parseInt($(this).attr("data-index"))).offset().top+80;
+		if (centerX > parentLeft1 && centerX < parentLeft && centerY > parentTop1 && centerY < parentTop) {
+			$(this).css({
+				"left":parentLeft1 + "px",
+				"top":parentTop1 + "px"
+			});
+			index.push($(this));
+			console.log(index);
+			console.log(index.length);
+		}
+		if (index.length == 9) {
+			alert("ok");
+			$("#video").css("opacity",1);
+			$("input").css("display","block");
+			_switch = true;
+		}
+	})
+	}
+	
+</script>

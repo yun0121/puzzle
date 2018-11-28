@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>hammer.js使用测试</title>
+	<style>
+		#test{
+			width: 200px;
+			height: 200px;
+			background-color: red;
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+	</style>
+</head>
+<body>
+	<p id="test"></p>
+</body>
+</html>
+<script type="text/javascript" src="http://g.alicdn.com/sj/lib/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/hammer.js/2.0.8/hammer.js"></script>
+<script src="js/jquery.hammer.js"></script>
+<script>
+	var hammer = $("#test").hammer();
+	hammer.on("panstart",function(ev){
+		console.log("拖动开始");
+		console.log(ev);
+	})
+	hammer.on("panmove",function(ev){
+		console.log("拖动...");
+		console.log("x坐标" + ev.gesture.deltaX);
+		console.log("y坐标" + ev.gesture.deltaY);
+		$("#test").css("top",ev.gesture.deltaY+"px");
+		$("#test").css("left",ev.gesture.deltaX+"px");
+	})
+	hammer.on("panend",function(ev){
+		console.log("拖动结束");
+		console.log(ev);
+	})
+</script>
